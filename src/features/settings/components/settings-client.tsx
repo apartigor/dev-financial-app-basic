@@ -3,6 +3,7 @@ import { useState, useTransition } from "react"
 import { Bell, User, Lock, Loader2 } from "lucide-react"
 import { signOut } from "@/features/auth/actions"
 import { ChangePasswordModal } from "@/features/auth/components/change-password-modal"
+import { BrandMark } from "@/features/auth/components/brand-mark"
 import { usePushSubscription } from "@/features/notifications/use-push"
 import { ThemeToggle } from "@/shared/ui/theme-toggle"
 import { cn } from "@/shared/lib/cn"
@@ -87,6 +88,13 @@ export function SettingsClient({ prefs: _, userEmail, userName }: Props) {
       >
         Sair da conta
       </button>
+
+      {/* Logo + versão */}
+      {/* Logo + versão */}
+      <div className="mt-8 flex flex-col items-center gap-1.5">
+        <BrandMark size="md" />
+        <span className="text-xs text-ink-faint">versão 1.1</span>
+      </div>
 
       <ChangePasswordModal open={pwModalOpen} onClose={() => setPwModalOpen(false)} />
     </div>

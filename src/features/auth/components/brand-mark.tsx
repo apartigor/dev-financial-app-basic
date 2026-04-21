@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { cn } from "@/shared/lib/cn"
 
 interface BrandMarkProps {
@@ -10,21 +9,21 @@ export function BrandMark({ size = "md", className }: BrandMarkProps) {
   const s = size === "lg" ? 40 : 32
   return (
     <div className={cn("inline-flex items-center gap-2.5", className)}>
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/icons/icon-dark.svg"
-        alt="budFin"
+        alt=""
         width={s}
         height={s}
         className="rounded-[20%] dark:hidden"
-        priority
       />
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/icons/icon-light.svg"
-        alt="budFin"
+        alt=""
         width={s}
         height={s}
         className="rounded-[20%] hidden dark:block"
-        priority
       />
       <span
         className="font-serif text-ink"
