@@ -3,8 +3,10 @@ import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { cn } from "@/shared/lib/cn"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 
-const WEEK_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"]
+const WEEK_LABELS_PT = ["D", "S", "T", "Q", "Q", "S", "S"]
+const WEEK_LABELS_EN = ["S", "M", "T", "W", "T", "F", "S"]
 
 function pad(n: number) { return String(n).padStart(2, "0") }
 function toISODate(d: Date) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` }
@@ -29,6 +31,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ label, value, onChange, error, minDate, className }: DatePickerProps) {
+  const { lang } = useLanguage()
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [viewDate, setViewDate] = useState<Date>(() => fromISODate(value) ?? new Date())
@@ -82,7 +85,8 @@ export function DatePicker({ label, value, onChange, error, minDate, className }
   const startDay   = monthStart.getDay()
   const today      = new Date(); today.setHours(0, 0, 0, 0)
   const min        = minDate ? fromISODate(minDate) : null
-  const monthLabel = viewDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+  const locale = lang === "en" ? "en-US" : "pt-BR"
+  const monthLabel = viewDate.toLocaleDateString(locale, { month: "long", year: "numeric" })
 
   const days: (number | null)[] = []
   for (let i = 0; i < startDay; i++) days.push(null)
@@ -115,7 +119,7 @@ export function DatePicker({ label, value, onChange, error, minDate, className }
 
       {/* Week labels */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {WEEK_LABELS.map((l, i) => (
+        {(lang === "en" ? WEEK_LABELS_EN : WEEK_LABELS_PT).map((l, i) => (
           <div key={i} className="h-8 flex items-center justify-center text-[11px] text-ink-faint font-medium">
             {l}
           </div>
@@ -155,11 +159,11 @@ export function DatePicker({ label, value, onChange, error, minDate, className }
       <div className="mt-3 pt-3 border-t border-hairline flex items-center justify-between">
         <button type="button" onClick={() => { onChange(toISODate(today)); setOpen(false) }}
           className="text-xs text-accent font-medium bg-transparent border-none cursor-pointer">
-          Hoje
+          {lang === "en" ? "Today" : "Hoje"}
         </button>
         <button type="button" onClick={() => setOpen(false)}
           className="text-xs text-ink-muted bg-transparent border-none cursor-pointer">
-          Fechar
+          {lang === "en" ? "Close" : "Fechar"}
         </button>
       </div>
     </div>
@@ -182,7 +186,11 @@ export function DatePicker({ label, value, onChange, error, minDate, className }
       >
         <CalendarIcon size={16} className="text-ink-muted flex-shrink-0" />
         <span className={cn("flex-1 min-w-0 truncate capitalize", value ? "text-ink" : "text-ink-faint")}>
-          {value ? formatDateBR(value) : "Selecionar data"}
+          {value
+            ? (lang === "en"
+                ? (() => { const d = fromISODate(value); return d ? d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "" })()
+                : formatDateBR(value))
+            : (lang === "en" ? "Select date" : "Selecionar data")}
         </span>
       </button>
 

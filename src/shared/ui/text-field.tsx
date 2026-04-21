@@ -39,6 +39,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         {prefix && <span className="text-ink-faint mr-2 text-base flex-shrink-0">{prefix}</span>}
         {multiline ? (
           <textarea
+            ref={ref as React.Ref<HTMLTextAreaElement>}
             className={cn(inputCls, "min-h-[80px]")}
             rows={rows}
             {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}

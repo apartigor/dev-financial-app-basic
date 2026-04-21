@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, Instrument_Serif } from "next/font/google"
 import { ThemeProvider } from "@/shared/ui/theme-provider"
 import { DensityProvider } from "@/shared/ui/density-provider"
+import { LanguageProvider } from "@/shared/lib/i18n/provider"
 import "./globals.css"
 
 const inter = Inter({
@@ -60,7 +61,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${instrumentSerif.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <DensityProvider>
-            {children}
+            <LanguageProvider>
+              {children}
+            </LanguageProvider>
           </DensityProvider>
         </ThemeProvider>
       </body>

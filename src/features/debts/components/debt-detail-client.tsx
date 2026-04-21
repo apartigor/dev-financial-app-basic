@@ -12,6 +12,7 @@ import { Chip } from "@/shared/ui/chip"
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog"
 import { daysUntilDue, formatDateBR } from "@/shared/lib/date"
 import { toggleDebtItem, markDebtPaid, deleteDebt } from "../actions"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 import type { DebtWithTotals, DebtItemRow } from "../types"
 
 interface Reminder {
@@ -29,9 +30,17 @@ interface Props {
 
 export function DebtDetailClient({ debt, items, reminders }: Props) {
   const router = useRouter()
+  const { lang } = useLanguage()
   const [pending, startTransition] = useTransition()
   const [localItems, setLocalItems] = useState(items)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+
+  function fmtDate(d: string) {
+    const [y, m, day] = d.split("-").map(Number)
+    const date = new Date(y!, m! - 1, day!)
+    if (lang === "en") return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    return formatDateBR(d)
+  }
 
   const days = daysUntilDue(debt.due_date)
   const totalCents    = Number(debt.total_cents)
@@ -47,7 +56,6 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
   const progressTone  = progress === 1 ? "paid" : localStatus === "overdue" ? "warn" : "accent"
 
   function handleToggleItem(itemId: string) {
-    if (isPaid) return
     const item = localItems.find((i) => i.id === itemId)
     if (!item) return
     const newPaid = !item.paid
@@ -74,9 +82,13 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
   }
 
   function formatReminderLabel(r: Reminder): string {
-    if (r.days_before === 0) return "No dia do vencimento"
-    if (r.days_before) return `${r.days_before} dia${r.days_before === 1 ? "" : "s"} antes`
-    return "Data específica"
+    if (r.days_before === 0) return lang === "en" ? "On the due date" : "No dia do vencimento"
+    if (r.days_before) {
+      return lang === "en"
+        ? `${r.days_before} day${r.days_before === 1 ? "" : "s"} before`
+        : `${r.days_before} dia${r.days_before === 1 ? "" : "s"} antes`
+    }
+    return lang === "en" ? "Custom date" : "Data específica"
   }
 
   return (
@@ -86,11 +98,10 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
         <div className="flex items-center gap-2 mb-1.5">
           <StatusDot status={localStatus} />
           <StatusLabel status={localStatus} days={days} />
-          {debt.recurrence_rule !== "none" && (
-            <Chip size="sm" tone="accent">Mensal</Chip>
-          )}
           <Chip size="sm" tone={debt.direction === "payable" ? "warn" : "accent"}>
-            {debt.direction === "payable" ? "A pagar" : "A receber"}
+            {debt.direction === "payable"
+              ? (lang === "en" ? "To pay" : "A pagar")
+              : (lang === "en" ? "To receive" : "A receber")}
           </Chip>
         </div>
         <p className="text-lg font-medium mb-3">{debt.title}</p>
@@ -98,23 +109,25 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
 
         <div className="flex gap-5 mt-4 pt-3.5 border-t border-dashed border-hairline">
           <div className="flex-1">
-            <p className="text-[11px] text-ink-muted mb-0.5 tracking-[0.3px]">Vencimento</p>
-            <p className="text-sm font-medium">{formatDateBR(debt.due_date)}</p>
+            <p className="text-[11px] text-ink-muted mb-0.5 tracking-[0.3px]">{lang === "en" ? "Due date" : "Vencimento"}</p>
+            <p className="text-sm font-medium">{fmtDate(debt.due_date)}</p>
           </div>
           <div className="w-px bg-hairline" />
           <div className="flex-1">
-            <p className="text-[11px] text-ink-muted mb-0.5 tracking-[0.3px]">Criada em</p>
-            <p className="text-sm font-medium">{formatDateBR(debt.created_at.slice(0, 10))}</p>
+            <p className="text-[11px] text-ink-muted mb-0.5 tracking-[0.3px]">{lang === "en" ? "Created on" : "Criada em"}</p>
+            <p className="text-sm font-medium">{fmtDate(debt.created_at.slice(0, 10))}</p>
           </div>
         </div>
 
         {showProgress && (
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="text-ink-muted">Recebido</span>
+              <span className="text-ink-muted">{lang === "en" ? "Received" : "Recebido"}</span>
               <span className="text-ink tabular-nums">
-                R$ {(paidCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}{" "}
-                <span className="text-ink-faint">de R$ {(totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                {lang === "en"
+                  ? `$${(paidCents / 100).toFixed(2)} of $${(totalCents / 100).toFixed(2)}`
+                  : `R$ ${(paidCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} de R$ ${(totalCents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                }
               </span>
             </div>
             <ProgressBar value={progress} tone={progressTone} height={8} />
@@ -127,7 +140,7 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
         <div className="bg-surface border border-hairline rounded-md p-[18px] mb-4">
           <div className="flex items-center gap-2 mb-3.5">
             <Handshake size={16} className="text-accent" />
-            <span className="text-sm font-medium">Cobranças</span>
+            <span className="text-sm font-medium">{lang === "en" ? "Charges" : "Cobranças"}</span>
           </div>
           <div className="flex flex-col">
             {localItems.map((item) => (
@@ -135,13 +148,12 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
                 <Checkbox
                   checked={item.paid}
                   onChange={() => handleToggleItem(item.id)}
-                  disabled={isPaid}
                 />
                 <div className="flex-1">
                   <p className={`text-sm font-medium ${item.paid ? "line-through text-ink-muted" : "text-ink"}`}>
                     {item.label}
                   </p>
-                  {item.paid && <p className="text-[11px] text-paid mt-0.5">Pago</p>}
+                  {item.paid && <p className="text-[11px] text-paid mt-0.5">{lang === "en" ? "Paid" : "Pago"}</p>}
                 </div>
                 <Money cents={Number(item.amount_cents)} size={16} tone={item.paid ? "paid" : "default"} />
               </div>
@@ -155,14 +167,14 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
         <div className="bg-surface border border-hairline rounded-md p-[18px] mb-4">
           <div className="flex items-center gap-2 mb-3.5">
             <Bell size={16} className="text-accent" />
-            <span className="text-sm font-medium">Lembretes</span>
+            <span className="text-sm font-medium">{lang === "en" ? "Reminders" : "Lembretes"}</span>
           </div>
           <div className="flex flex-col gap-2.5">
             {reminders.map((r) => (
               <div key={r.id} className="flex items-center gap-2.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
                 <span className="flex-1 text-[13px]">{formatReminderLabel(r)}</span>
-                <span className="text-xs text-ink-faint">{formatDateBR(r.remind_on)}</span>
+                <span className="text-xs text-ink-faint">{fmtDate(r.remind_on)}</span>
               </div>
             ))}
           </div>
@@ -170,9 +182,9 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
       )}
 
       {/* Notes */}
-      {debt.notes && (
+      {debt.notes?.trim() && (
         <div className="bg-surface border border-hairline rounded-md p-[18px] mb-4">
-          <p className="text-xs font-medium text-ink-muted uppercase tracking-[0.6px] mb-2">Notas</p>
+          <p className="text-xs font-medium text-ink-muted uppercase tracking-[0.6px] mb-2">{lang === "en" ? "Notes" : "Notas"}</p>
           <p className="text-sm text-ink-muted leading-relaxed">{debt.notes}</p>
         </div>
       )}
@@ -184,11 +196,11 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
           onClick={() => router.push(`/debts/${debt.id}/edit`)}
           className="flex-1"
         >
-          <Edit2 size={14} /> Editar
+          <Edit2 size={14} /> {lang === "en" ? "Edit" : "Editar"}
         </Button>
         {!isPaid && (
           <Button variant="accent" onClick={handleMarkPaid} disabled={pending} style={{ flex: 2 }}>
-            <Check size={16} strokeWidth={2.5} /> Marcar como paga
+            <Check size={16} strokeWidth={2.5} /> {lang === "en" ? "Mark as paid" : "Marcar como paga"}
           </Button>
         )}
       </div>
@@ -198,16 +210,18 @@ export function DebtDetailClient({ debt, items, reminders }: Props) {
         disabled={pending}
         className="mt-3.5 w-full py-2.5 text-[13px] text-warn bg-transparent border-none cursor-pointer hover:underline underline-offset-4 disabled:opacity-50"
       >
-        Excluir dívida
+        {lang === "en" ? "Delete debt" : "Excluir dívida"}
       </button>
 
       <ConfirmDialog
         open={confirmDeleteOpen}
         tone="warn"
-        title="Excluir esta dívida?"
-        description={`"${debt.title}" será removida permanentemente. Essa ação não pode ser desfeita.`}
-        confirmLabel="Excluir"
-        cancelLabel="Manter"
+        title={lang === "en" ? "Delete this debt?" : "Excluir esta dívida?"}
+        description={lang === "en"
+          ? `"${debt.title}" will be permanently removed. This cannot be undone.`
+          : `"${debt.title}" será removida permanentemente. Essa ação não pode ser desfeita.`}
+        confirmLabel={lang === "en" ? "Delete" : "Excluir"}
+        cancelLabel={lang === "en" ? "Keep" : "Manter"}
         loading={pending}
         onCancel={() => setConfirmDeleteOpen(false)}
         onConfirm={handleDelete}

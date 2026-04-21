@@ -25,7 +25,7 @@ export default async function EditDebtPage({ params }: Props) {
     direction:       debt.direction as "payable" | "receivable",
     totalCents,
     dueDate:         debt.due_date,
-    notes:           debt.notes ?? "",
+    notes:           debt.notes?.trim() ?? "",
     recurrenceRule:  debt.recurrence_rule as "none" | "monthly" | "weekly" | "yearly",
     items:           isSimple
       ? []

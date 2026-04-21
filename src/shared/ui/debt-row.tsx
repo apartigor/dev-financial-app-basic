@@ -1,10 +1,11 @@
+"use client"
 import { cn } from "@/shared/lib/cn"
-import { Repeat2 } from "lucide-react"
 import { Money } from "./money"
 import { StatusDot } from "./status-dot"
 import { StatusLabel } from "./status-label"
 import { ProgressBar } from "./progress-bar"
 import { daysUntilDue, formatDateBR } from "@/shared/lib/date"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 
 type DebtStatus = "pending" | "overdue" | "paid" | "empty"
 
@@ -29,12 +30,32 @@ interface DebtRowProps {
 }
 
 export function DebtRow({ debt, onClick, compact = false, className }: DebtRowProps) {
+  const { lang } = useLanguage()
   const days = daysUntilDue(debt.dueDate)
   const hasSubs = debt.itemsCount > 1
   const progress = debt.totalCents > 0 ? debt.paidCents / debt.totalCents : 0
   const showProgress = hasSubs || debt.status === "paid"
   const progressTone = progress === 1 ? "paid" : debt.status === "overdue" ? "warn" : "accent"
   const pad = compact ? "p-3" : "p-4"
+
+  function formatDate(d: string) {
+    if (lang === "en") {
+      const [y, m, day] = d.split("-").map(Number)
+      const date = new Date(y!, m! - 1, day!)
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    }
+    return formatDateBR(d)
+  }
+
+  const receivedLabel = lang === "en"
+    ? `${debt.itemsPaidCount}/${debt.itemsCount} paid`
+    : `${debt.itemsPaidCount}/${debt.itemsCount} receberam`
+
+  const directionLabel = debt.direction
+    ? (debt.direction === "payable"
+        ? (lang === "en" ? "pay" : "pagar")
+        : (lang === "en" ? "receive" : "receber"))
+    : null
 
   return (
     <button
@@ -49,56 +70,37 @@ export function DebtRow({ debt, onClick, compact = false, className }: DebtRowPr
         className
       )}
     >
-      {/* Top row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <StatusDot status={debt.status} />
-            <span
-              className={cn(
-                "font-medium truncate",
-                compact ? "text-sm" : "text-base"
-              )}
-            >
+            <span className={cn("font-medium truncate", compact ? "text-sm" : "text-base")}>
               {debt.title}
             </span>
-            {debt.recurrenceRule && debt.recurrenceRule !== "none" && (
-              <Repeat2 size={12} className="text-ink-faint flex-shrink-0" />
-            )}
-            {debt.direction && (
+            {directionLabel && (
               <span className={cn(
                 "text-[10px] font-medium px-1.5 py-0.5 rounded-pill flex-shrink-0",
-                debt.direction === "payable"
-                  ? "bg-warn-soft text-warn"
-                  : "bg-paid-soft text-paid"
+                debt.direction === "payable" ? "bg-warn-soft text-warn" : "bg-paid-soft text-paid"
               )}>
-                {debt.direction === "payable" ? "pagar" : "receber"}
+                {directionLabel}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-ink-faint">{formatDateBR(debt.dueDate)}</span>
+            <span className="text-xs text-ink-faint">{formatDate(debt.dueDate)}</span>
             <span className="w-0.5 h-0.5 rounded-full bg-ink-faint opacity-50" />
             <StatusLabel status={debt.status} days={days} />
           </div>
         </div>
 
-        {/* Right: amount + sub count */}
         <div className="text-right flex-shrink-0">
-          <Money
-            cents={debt.totalCents}
-            size={compact ? 18 : 20}
-            tone={debt.status === "paid" ? "paid" : "default"}
-          />
+          <Money cents={debt.totalCents} size={compact ? 18 : 20} tone={debt.status === "paid" ? "paid" : "default"} />
           {hasSubs && (
-            <p className="text-[11px] text-ink-faint mt-0.5">
-              {debt.itemsPaidCount}/{debt.itemsCount} receberam
-            </p>
+            <p className="text-[11px] text-ink-faint mt-0.5">{receivedLabel}</p>
           )}
         </div>
       </div>
 
-      {/* Progress bar */}
       {showProgress && (
         <ProgressBar value={progress} tone={progressTone} height={4} />
       )}

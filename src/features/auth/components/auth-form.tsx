@@ -10,13 +10,14 @@ import { BrandMark } from "./brand-mark"
 import { AuthSwitcher } from "./auth-switcher"
 import { signIn, signUp } from "../actions"
 import { loginSchema, registerSchema } from "../schemas"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 import type { LoginInput, RegisterInput } from "../schemas"
 
 type Mode = "login" | "register"
-
 interface AuthFormProps { mode: Mode }
 
 export function AuthForm({ mode: initialMode }: AuthFormProps) {
+  const { t } = useLanguage()
   const [mode, setMode] = useState<Mode>(initialMode)
   const [error, setError] = useState<string>()
   const [pending, startTransition] = useTransition()
@@ -49,65 +50,39 @@ export function AuthForm({ mode: initialMode }: AuthFormProps) {
   return (
     <div className="flex flex-col min-h-screen px-[26px] pt-[60px] pb-8 md:px-0 md:pt-0 md:min-h-0 md:py-0 md:block">
       <div className="mb-10 md:hidden"><BrandMark /></div>
-
       <AuthSwitcher mode={mode} onChange={switchMode} />
 
-      {/* Form area — re-keyed on mode switch to trigger entry animation */}
-      <div
-        key={mode}
-        className="flex-1 md:flex-none animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
-      >
+      <div key={mode} className="flex-1 md:flex-none animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
         <h1 className="font-serif text-[32px] md:text-[38px] leading-[1.05] tracking-[-0.6px] mb-2">
-          {mode === "login" ? "Bem-vindo de volta." : "Comece agora."}
+          {mode === "login" ? t.auth.welcomeBack : t.auth.startNow}
         </h1>
         <p className="text-sm text-ink-muted mb-7">
-          {mode === "login"
-            ? "Entre para continuar."
-            : "Organize suas dívidas e cobranças em um só lugar."}
+          {mode === "login" ? t.auth.enterToContinue : t.auth.organizeDebts}
         </p>
 
         {mode === "login" ? (
           <form onSubmit={loginForm.handleSubmit(handleLogin)} className="flex flex-col gap-3.5">
-            <TextField
-              label="E-mail" type="email" placeholder="seu@email.com" autoComplete="email"
-              {...loginForm.register("email")}
-              error={loginForm.formState.errors.email?.message}
-            />
-            <PasswordField
-              label="Senha" placeholder="••••••••" autoComplete="current-password"
-              {...loginForm.register("password")}
-              error={loginForm.formState.errors.password?.message}
-            />
-            {error && (
-              <p className="text-xs text-warn animate-in fade-in duration-200">{error}</p>
-            )}
+            <TextField label={t.auth.email} type="email" placeholder={t.auth.emailPlaceholder} autoComplete="email"
+              {...loginForm.register("email")} error={loginForm.formState.errors.email?.message} />
+            <PasswordField label={t.auth.password} placeholder={t.auth.passwordPlaceholder} autoComplete="current-password"
+              {...loginForm.register("password")} error={loginForm.formState.errors.password?.message} />
+            {error && <p className="text-xs text-warn animate-in fade-in duration-200">{error}</p>}
             <Button type="submit" full size="lg" disabled={pending} className="mt-2 gap-2">
-              {pending ? "Entrando…" : "Entrar"}
+              {pending ? t.auth.signingIn : t.auth.signIn}
               <ArrowRight size={16} />
             </Button>
           </form>
         ) : (
           <form onSubmit={registerForm.handleSubmit(handleRegister)} className="flex flex-col gap-3.5">
-            <TextField
-              label="Nome" placeholder="Como podemos te chamar?"
-              {...registerForm.register("name")}
-              error={registerForm.formState.errors.name?.message}
-            />
-            <TextField
-              label="E-mail" type="email" placeholder="seu@email.com" autoComplete="email"
-              {...registerForm.register("email")}
-              error={registerForm.formState.errors.email?.message}
-            />
-            <PasswordField
-              label="Senha" placeholder="••••••••" autoComplete="new-password"
-              {...registerForm.register("password")}
-              error={registerForm.formState.errors.password?.message}
-            />
-            {error && (
-              <p className="text-xs text-warn animate-in fade-in duration-200">{error}</p>
-            )}
+            <TextField label={t.auth.name} placeholder={t.auth.namePlaceholder}
+              {...registerForm.register("name")} error={registerForm.formState.errors.name?.message} />
+            <TextField label={t.auth.email} type="email" placeholder={t.auth.emailPlaceholder} autoComplete="email"
+              {...registerForm.register("email")} error={registerForm.formState.errors.email?.message} />
+            <PasswordField label={t.auth.password} placeholder={t.auth.passwordPlaceholder} autoComplete="new-password"
+              {...registerForm.register("password")} error={registerForm.formState.errors.password?.message} />
+            {error && <p className="text-xs text-warn animate-in fade-in duration-200">{error}</p>}
             <Button type="submit" full size="lg" disabled={pending} className="mt-2 gap-2">
-              {pending ? "Criando…" : "Criar conta"}
+              {pending ? t.auth.creating : t.auth.createAccount}
               <ArrowRight size={16} />
             </Button>
           </form>

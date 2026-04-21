@@ -5,7 +5,7 @@ import { listDebts } from "@/features/debts/repository"
 export default async function DebtsPage() {
   const debts = await listDebts()
   return (
-    <AppShell title="Dívidas">
+    <AppShell titleKey="debts">
       <DebtListClient debts={debts} />
     </AppShell>
   )

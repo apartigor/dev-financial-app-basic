@@ -6,22 +6,28 @@ import { cn } from "@/shared/lib/cn"
 import { BrandMark } from "@/features/auth/components/brand-mark"
 import { ThemeToggle } from "./theme-toggle"
 import { LinkPendingIndicator } from "./link-pending-indicator"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 
-const tabs = [
-  { id: "dashboard", label: "Início",       href: "/dashboard", Icon: Home },
-  { id: "debts",     label: "Dívidas",      href: "/debts",     Icon: List },
-  { id: "new",       label: "Nova dívida",  href: "/debts/new", Icon: Plus },
-  { id: "settings",  label: "Ajustes",      href: "/settings",  Icon: Settings },
+const tabDefs = [
+  { id: "dashboard", href: "/dashboard", Icon: Home,     key: "home" as const },
+  { id: "debts",     href: "/debts",     Icon: List,     key: "debts" as const },
+  { id: "new",       href: "/debts/new", Icon: Plus,     key: "newDebt" as const },
+  { id: "settings",  href: "/settings",  Icon: Settings, key: "settings" as const },
 ] as const
 
 export function DesktopSidebar() {
   const pathname = usePathname()
-  const hrefs = tabs.map((t) => t.href)
+  const { t } = useLanguage()
+  const hrefs = tabDefs.map((tb) => tb.href)
+
   function isActive(href: string) {
     if (pathname === href) return true
     if (!pathname.startsWith(href + "/")) return false
-    // Another tab has a longer, more specific prefix? Not active then.
     return !hrefs.some((h) => h !== href && h.startsWith(href) && pathname.startsWith(h))
+  }
+
+  const labels: Record<string, string> = {
+    home: t.nav.home ?? "", debts: t.nav.debts ?? "", newDebt: t.nav.newDebt ?? "", settings: t.nav.settings ?? "",
   }
 
   return (
@@ -32,42 +38,21 @@ export function DesktopSidebar() {
       </div>
 
       <nav className="flex flex-col gap-0.5">
-        {tabs.map(({ id, label, href, Icon }) => {
+        {tabDefs.map(({ id, href, Icon, key }) => {
           const active = isActive(href)
           return (
-            <Link
-              key={id}
-              href={href}
-              className={cn(
-                "group relative flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] text-sm",
+            <Link key={id} href={href}
+              className={cn("group relative flex items-center gap-2.5 px-2.5 py-2 rounded-[8px] text-sm",
                 "transition-all duration-200",
-                active
-                  ? "bg-surface-alt text-ink font-medium"
-                  : "text-ink-muted hover:bg-surface-alt/60 hover:text-ink"
-              )}
-            >
-              {/* Active bar indicator — slides in */}
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-pill bg-accent",
-                  "transition-all duration-200 origin-left",
-                  active ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"
-                )}
-              />
-              {/* Pending (loading) bar overrides active bar */}
+                active ? "bg-surface-alt text-ink font-medium" : "text-ink-muted hover:bg-surface-alt/60 hover:text-ink")}>
+              <span aria-hidden className={cn(
+                "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-pill bg-accent",
+                "transition-all duration-200 origin-left",
+                active ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50")} />
               <LinkPendingIndicator variant="bar" />
-
-              <Icon
-                size={16}
-                strokeWidth={1.75}
-                className={cn("transition-transform duration-200 flex-shrink-0",
-                  "group-hover:scale-110"
-                )}
-              />
-              <span className="flex-1">{label}</span>
-
-              {/* Pending dot at the end */}
+              <Icon size={16} strokeWidth={1.75}
+                className={cn("transition-transform duration-200 flex-shrink-0", "group-hover:scale-110")} />
+              <span className="flex-1">{labels[key]}</span>
               <LinkPendingIndicator />
             </Link>
           )
@@ -79,9 +64,9 @@ export function DesktopSidebar() {
       <div className="p-3 rounded-sm bg-surface-alt text-xs text-ink-muted leading-[1.4]">
         <div className="flex items-center gap-1.5 mb-1">
           <Bell size={12} className="text-accent" />
-          <span className="text-ink font-medium">Notificações ativas</span>
+          <span className="text-ink font-medium">{t.settings.pushNotifications}</span>
         </div>
-        Você receberá lembretes push conforme agendou em cada dívida.
+        {t.settings.pushActive}
       </div>
     </aside>
   )

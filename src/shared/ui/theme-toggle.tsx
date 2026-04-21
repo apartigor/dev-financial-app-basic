@@ -4,6 +4,7 @@ import { useTheme } from "next-themes"
 import { Sun, Moon } from "lucide-react"
 import { cn } from "@/shared/lib/cn"
 import { updatePreferences } from "@/features/settings/actions"
+import { useLanguage } from "@/shared/lib/i18n/provider"
 
 interface Props {
   className?: string
@@ -12,6 +13,7 @@ interface Props {
 
 export function ThemeToggle({ className, variant = "icon" }: Props) {
   const { resolvedTheme, setTheme } = useTheme()
+  const { lang } = useLanguage()
   const [mounted, setMounted] = useState(false)
   const [, startTransition] = useTransition()
 
@@ -44,9 +46,15 @@ export function ThemeToggle({ className, variant = "icon" }: Props) {
           <span className="w-[30px] h-[30px] rounded-[8px] bg-accent-soft text-accent flex items-center justify-center">
             {isDark ? <Moon size={15} /> : <Sun size={15} />}
           </span>
-          <span className="text-sm text-ink">Tema {isDark ? "escuro" : "claro"}</span>
+          <span className="text-sm text-ink">
+            {lang === "en" ? (isDark ? "Dark" : "Light") : (`Tema ${isDark ? "escuro" : "claro"}`)}
+          </span>
         </span>
-        <span className="text-xs text-ink-faint">{isDark ? "Mudar para claro" : "Mudar para escuro"}</span>
+        <span className="text-xs text-ink-faint">
+          {lang === "en"
+            ? (isDark ? "Switch to light" : "Switch to dark")
+            : (isDark ? "Mudar para claro" : "Mudar para escuro")}
+        </span>
       </button>
     )
   }

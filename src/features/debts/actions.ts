@@ -22,7 +22,7 @@ export async function createDebt(input: DebtInput): Promise<{ error?: string; id
     .insert({
       household_id: householdId, created_by: user.id,
       title: d.title, direction: d.direction,
-      due_date: d.dueDate, notes: d.notes ?? null,
+      due_date: d.dueDate, notes: d.notes?.trim() || null,
       recurrence_rule: d.recurrenceRule,
     })
     .select("id")
@@ -64,7 +64,7 @@ export async function updateDebt(id: string, input: DebtInput): Promise<{ error?
 
   const { error } = await supabase.from("debts").update({
     title: d.title, direction: d.direction, due_date: d.dueDate,
-    notes: d.notes ?? null, recurrence_rule: d.recurrenceRule,
+    notes: d.notes?.trim() || null, recurrence_rule: d.recurrenceRule,
   }).eq("id", id)
 
   if (error) return { error: "Erro ao atualizar." }
