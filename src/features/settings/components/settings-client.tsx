@@ -1,7 +1,8 @@
 "use client"
 import { useState, useTransition } from "react"
-import { Bell, User, Lock, Check, Loader2 } from "lucide-react"
-import { signOut, sendPasswordReset } from "@/features/auth/actions"
+import { Bell, User, Lock, Loader2 } from "lucide-react"
+import { signOut } from "@/features/auth/actions"
+import { ChangePasswordModal } from "@/features/auth/components/change-password-modal"
 import { usePushSubscription } from "@/features/notifications/use-push"
 import { ThemeToggle } from "@/shared/ui/theme-toggle"
 import { cn } from "@/shared/lib/cn"
@@ -17,8 +18,7 @@ export function SettingsClient({ prefs: _, userEmail, userName }: Props) {
   const [, startTransition] = useTransition()
   const { supported, subscribed, loading: pushLoading, subscribe, unsubscribe } = usePushSubscription()
 
-  const [pwResetState, setPwResetState] = useState<"idle" | "sending" | "sent" | "error">("idle")
-  const [pwResetMsg,   setPwResetMsg]   = useState<string>()
+  const [pwModalOpen, setPwModalOpen] = useState(false)
 
   async function handlePushToggle() {
     if (subscribed) {
@@ -32,17 +32,6 @@ export function SettingsClient({ prefs: _, userEmail, userName }: Props) {
     }
   }
 
-  async function handleChangePassword() {
-    setPwResetState("sending")
-    const r = await sendPasswordReset()
-    if (r.error) {
-      setPwResetState("error")
-      setPwResetMsg(r.error)
-    } else {
-      setPwResetState("sent")
-      setPwResetMsg(`Enviamos um link para ${userEmail}. Abra seu e-mail.`)
-    }
-  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -50,24 +39,17 @@ export function SettingsClient({ prefs: _, userEmail, userName }: Props) {
       <SettingsGroup title="Conta">
         <SettingsRow icon={<User size={15} />} label={userName ?? "Usuário"} hint={userEmail} />
         <button
-          onClick={handleChangePassword}
-          disabled={pwResetState === "sending"}
+          onClick={() => setPwModalOpen(true)}
           className="flex items-center gap-3 px-4 py-3.5 border-b border-hairline last:border-0 w-full
-            bg-transparent transition-colors hover:bg-surface-alt/40 disabled:opacity-60"
+            bg-transparent transition-colors hover:bg-surface-alt/40"
         >
           <span className="w-[30px] h-[30px] rounded-[8px] bg-accent-soft text-accent flex items-center justify-center flex-shrink-0">
             <Lock size={15} />
           </span>
           <span className="flex-1 min-w-0 text-left">
             <span className="block text-sm text-ink">Alterar senha</span>
-            <span className="block text-xs text-ink-faint mt-0.5">
-              {pwResetState === "sending" && "Enviando…"}
-              {pwResetState === "sent"    && "E-mail enviado — confira sua caixa."}
-              {pwResetState === "error"   && (pwResetMsg ?? "Erro ao enviar.")}
-              {pwResetState === "idle"    && "Enviaremos um link de redefinição para seu e-mail."}
-            </span>
+            <span className="block text-xs text-ink-faint mt-0.5">Defina uma nova senha para sua conta.</span>
           </span>
-          {pwResetState === "sent" && <Check size={16} className="text-paid" />}
         </button>
       </SettingsGroup>
 
@@ -105,6 +87,8 @@ export function SettingsClient({ prefs: _, userEmail, userName }: Props) {
       >
         Sair da conta
       </button>
+
+      <ChangePasswordModal open={pwModalOpen} onClose={() => setPwModalOpen(false)} />
     </div>
   )
 }

@@ -1,5 +1,3 @@
-"use client"
-import { useRouter } from "next/navigation"
 import { toZonedTime } from "date-fns-tz"
 import { addDays, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -13,7 +11,6 @@ interface CalendarStripProps {
 }
 
 export function CalendarStrip({ days }: CalendarStripProps) {
-  const router = useRouter()
   const today = toZonedTime(new Date(), TZ)
 
   // Month label for header
@@ -36,17 +33,16 @@ export function CalendarStrip({ days }: CalendarStripProps) {
           const hasDebts = day.debtCount > 0
 
           return (
-            <button
+            <div
               key={day.date}
-              onClick={() => hasDebts && day.debtIds[0] && router.push(`/debts/${day.debtIds[0]}`)}
               className={[
                 "flex flex-col items-center gap-0.5 py-1.5 px-0.5 rounded-sm min-h-[52px]",
                 "border transition-colors",
                 day.isToday
                   ? "bg-ink text-bg border-transparent"
                   : hasDebts
-                  ? "bg-accent-soft border-transparent cursor-pointer"
-                  : "bg-transparent border-hairline cursor-default",
+                  ? "bg-accent-soft border-transparent"
+                  : "bg-transparent border-hairline",
               ].join(" ")}
             >
               <span className={`text-[9px] font-medium uppercase ${day.isToday ? "text-bg opacity-80" : "text-ink-faint"}`}>
@@ -65,7 +61,7 @@ export function CalendarStrip({ days }: CalendarStripProps) {
                   ))}
                 </span>
               )}
-            </button>
+            </div>
           )
         })}
       </div>

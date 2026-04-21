@@ -107,6 +107,7 @@ export function DebtListClient({ debts }: Props) {
                     recurrenceRule: d.recurrence_rule,
                     itemsCount: Number(d.items_count),
                     itemsPaidCount: Number(d.items_paid_count),
+                    direction: d.direction as "payable" | "receivable",
                   }}
                   onClick={() => router.push(`/debts/${d.id}`)}
                 />

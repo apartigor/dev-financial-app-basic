@@ -8,6 +8,7 @@ interface ConfirmDialogProps {
   open: boolean
   title: string
   description?: string
+  children?: React.ReactNode
   confirmLabel?: string
   cancelLabel?: string
   tone?: "warn" | "default"
@@ -20,6 +21,7 @@ export function ConfirmDialog({
   open,
   title,
   description,
+  children,
   confirmLabel = "Confirmar",
   cancelLabel = "Cancelar",
   tone = "default",
@@ -65,8 +67,9 @@ export function ConfirmDialog({
           {title}
         </h2>
         {description && (
-          <p className="text-sm text-ink-muted mb-6 leading-relaxed">{description}</p>
+          <p className="text-sm text-ink-muted mb-2 leading-relaxed">{description}</p>
         )}
+        {children}
 
         <div className="flex gap-2.5 mt-6">
           <Button

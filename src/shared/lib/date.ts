@@ -8,28 +8,37 @@ export function todayBRT(): Date {
   return toZonedTime(new Date(), TZ)
 }
 
+/** Parses "YYYY-MM-DD" into a Date using LOCAL date components (no timezone shift) */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number)
+  return new Date(y!, m! - 1, d!)
+}
+
 /** Formats a Date or ISO string as "YYYY-MM-DD" */
 export function toISODate(d: Date | string): string {
-  const date = typeof d === "string" ? new Date(d) : d
-  return formatDate(date, "yyyy-MM-dd")
+  const date = typeof d === "string" ? parseLocalDate(d) : d
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${day}`
 }
 
 /** Days until a due date from today (negative = overdue) */
 export function daysUntilDue(dueDateStr: string): number {
   const today = todayBRT()
-  const due = toZonedTime(new Date(dueDateStr + "T00:00:00"), TZ)
+  const due = parseLocalDate(dueDateStr)
   return differenceInCalendarDays(due, today)
 }
 
 /** Formats a date string as "dd/MM/yyyy" */
 export function formatDateBR(dateStr: string): string {
-  const d = toZonedTime(new Date(dateStr + "T00:00:00"), TZ)
-  return formatDate(d, "dd/MM/yyyy")
+  const d = parseLocalDate(dateStr)
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
 }
 
 /** Formats a date string as "12 mai" */
 export function formatDateShort(dateStr: string): string {
-  const d = toZonedTime(new Date(dateStr + "T00:00:00"), TZ)
+  const d = parseLocalDate(dateStr)
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "")
 }
 
@@ -51,6 +60,5 @@ export function buildReminderDates(
   dueDateStr: string,
   daysBefore: number[]
 ): string[] {
-  const due = toZonedTime(new Date(dueDateStr + "T00:00:00"), TZ)
-  return daysBefore.map((n) => toISODate(addDays(due, -n)))
+  return daysBefore.map((n) => toISODate(addDays(parseLocalDate(dueDateStr), -n)))
 }

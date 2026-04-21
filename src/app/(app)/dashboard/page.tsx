@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { AppShell } from "@/shared/ui/app-shell"
-import { DebtRow } from "@/shared/ui/debt-row"
+import { DebtRowLink } from "@/features/dashboard/components/debt-row-link"
 import { HeroSummary } from "@/features/dashboard/components/hero-summary"
 import { CalendarStrip } from "@/features/dashboard/components/calendar-strip"
 import {
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="flex flex-col gap-2.5">
           {upcoming.map((d) => (
-            <DebtRow
+            <DebtRowLink
               key={d.id}
               debt={{
                 id: d.id,
@@ -64,6 +64,7 @@ export default async function DashboardPage() {
                 recurrenceRule: d.recurrence_rule,
                 itemsCount: Number(d.items_count),
                 itemsPaidCount: Number(d.items_paid_count),
+                direction: d.direction as "payable" | "receivable",
               }}
             />
           ))}

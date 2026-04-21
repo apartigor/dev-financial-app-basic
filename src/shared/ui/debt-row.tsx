@@ -15,6 +15,7 @@ export interface DebtRowData {
   paidCents: number
   dueDate: string
   status: DebtStatus
+  direction?: "payable" | "receivable"
   recurrenceRule?: string
   itemsCount: number
   itemsPaidCount: number
@@ -63,6 +64,16 @@ export function DebtRow({ debt, onClick, compact = false, className }: DebtRowPr
             </span>
             {debt.recurrenceRule && debt.recurrenceRule !== "none" && (
               <Repeat2 size={12} className="text-ink-faint flex-shrink-0" />
+            )}
+            {debt.direction && (
+              <span className={cn(
+                "text-[10px] font-medium px-1.5 py-0.5 rounded-pill flex-shrink-0",
+                debt.direction === "payable"
+                  ? "bg-warn-soft text-warn"
+                  : "bg-paid-soft text-paid"
+              )}>
+                {debt.direction === "payable" ? "pagar" : "receber"}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-2">

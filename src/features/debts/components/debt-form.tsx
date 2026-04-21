@@ -27,7 +27,8 @@ const PRESET_LABELS: Record<number, string> = {
 function getPresetSubLabel(dueDate: string, daysBefore: number): string {
   if (!dueDate) return ""
   try {
-    const due = new Date(dueDate + "T00:00:00")
+    const [y, m, d] = dueDate.split("-").map(Number)
+    const due = new Date(y!, m! - 1, d!)
     due.setDate(due.getDate() - daysBefore)
     return due.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })
       .replace(".", "").replace("-feira", "")

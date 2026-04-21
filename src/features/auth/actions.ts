@@ -1,6 +1,8 @@
 "use server"
 import { redirect } from "next/navigation"
 import { createClient } from "@/shared/lib/supabase/server"
+import { getUser } from "@/shared/lib/supabase/server"
+import { createAdminClient } from "@/shared/lib/supabase/admin"
 import { loginSchema, registerSchema } from "./schemas"
 import type { LoginInput, RegisterInput } from "./schemas"
 
@@ -32,17 +34,17 @@ export async function signUp(input: RegisterInput): Promise<{ error?: string }> 
     return { error: "Não foi possível criar a conta. Tente novamente." }
   }
 
-  // Create household + preferences for new user
   if (data.user) {
-    const admin = (await import("@/shared/lib/supabase/admin")).createAdminClient()
+    const admin = createAdminClient()
     const { data: hh } = await admin
       .from("households")
       .insert({ name: "Minha Casa" })
       .select("id")
       .single()
     if (hh) {
+      const hhData = hh as { id: string }
       await admin.from("household_members").insert({
-        household_id: hh.id, user_id: data.user.id, role: "owner",
+        household_id: hhData.id, user_id: data.user.id, role: "owner",
       })
       await admin.from("user_preferences").insert({ user_id: data.user.id })
     }
@@ -57,15 +59,21 @@ export async function signOut() {
   redirect("/auth")
 }
 
-export async function sendPasswordReset(): Promise<{ error?: string; sent?: boolean }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return { error: "Não autenticado." }
+export async function updatePassword(
+  newPassword: string,
+  confirmPassword: string
+): Promise<{ error?: string }> {
+  if (newPassword.length < 12)
+    return { error: "A senha deve ter ao menos 12 caracteres." }
+  if (newPassword !== confirmPassword)
+    return { error: "As senhas não coincidem." }
 
-  const origin = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${origin}/reset-password`,
-  })
-  if (error) return { error: "Não foi possível enviar o e-mail." }
-  return { sent: true }
+  const user = await getUser()
+  if (!user) return { error: "Não autenticado." }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) return { error: "Não foi possível atualizar a senha." }
+
+  return {}
 }
