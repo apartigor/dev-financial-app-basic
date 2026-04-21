@@ -1,0 +1,21 @@
+name: DB Backup
+
+on:
+  schedule:
+    - cron: "0 3 1 * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump database
+        run: |
+          pg_dump "${{ secrets.DATABASE_URL }}" \
+            --no-owner --no-acl \
+            > budfin-$(date +%F).sql
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: "*.sql"
+          retention-days: 90

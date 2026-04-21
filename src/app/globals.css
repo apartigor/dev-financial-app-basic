@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens: Light ── */
+:root {
+  --color-bg:             #f6f3ec;
+  --color-surface:        #fffdf7;
+  --color-surface-alt:    #f0ece3;
+  --color-ink:            #1a1813;
+  --color-ink-muted:      #5c564b;
+  --color-ink-faint:      #9c9589;
+  --color-hairline:       rgba(26, 24, 19, 0.08);
+  --color-hairline-strong: rgba(26, 24, 19, 0.14);
+  --color-accent:         #5e6b3a;
+  --color-accent-soft:    #dce1c9;
+  --color-warn:           #b5502e;
+  --color-warn-soft:      #f0d9cc;
+  --color-paid:           #7a8856;
+  --color-paid-soft:      #e4e8d3;
+}
+
+/* ── Design tokens: Dark ── */
+.dark {
+  --color-bg:             #14120e;
+  --color-surface:        #1f1c16;
+  --color-surface-alt:    #2a2620;
+  --color-ink:            #f2eee4;
+  --color-ink-muted:      #a8a093;
+  --color-ink-faint:      #6a6458;
+  --color-hairline:       rgba(242, 238, 228, 0.08);
+  --color-hairline-strong: rgba(242, 238, 228, 0.16);
+  --color-accent:         #a3b47a;
+  --color-accent-soft:    #2e3421;
+  --color-warn:           #d18062;
+  --color-warn-soft:      #3a241b;
+  --color-paid:           #9caa78;
+  --color-paid-soft:      #2a311c;
+}
+
+/* ── Density: Compact overrides ── */
+.density-compact {
+  --density-gap:      8px;
+  --density-row-pad:  10px;
+  --density-card-pad: 14px;
+  --density-fs-base:  14px;
+}
+
+/* ── Density: Comfy defaults ── */
+:root {
+  --density-gap:      14px;
+  --density-row-pad:  16px;
+  --density-card-pad: 20px;
+  --density-fs-base:  15px;
+}
+
+/* ── Base ── */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: var(--density-fs-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Instrument Serif utility */
+.font-serif {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+}
+
+/* Hairline border utility */
+.border-hairline {
+  border-color: var(--color-hairline);
+}
+.border-hairline-strong {
+  border-color: var(--color-hairline-strong);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-hairline-strong); border-radius: 999px; }
+
+/* Smooth theme transitions — only on bg/surface/ink colors, not every element */
+html { transition: color-scheme 0.2s ease; }
+
+/* DebtRow subtle lift on hover */
+button[data-debt-row]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
