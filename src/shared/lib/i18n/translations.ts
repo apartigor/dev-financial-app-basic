@@ -19,7 +19,7 @@ export const translations = {
       alreadyHaveAccount: "Já tem uma conta?",
       tagline: "Dívidas sem estresse. Lembretes no seu ritmo.",
       taglineSub: "Cadastre, divida entre amigos, e escolha exatamente quando quer ser lembrado.",
-      pwa: "PWA · Android · iOS",
+      pwa: "Desktop · Android · iOS",
     },
     nav: {
       home: "Início",
@@ -193,7 +193,7 @@ export const translations = {
       alreadyHaveAccount: "Already have an account?",
       tagline: "Stress-free debts. Reminders on your terms.",
       taglineSub: "Sign up, split charges with friends, and choose exactly when to be reminded.",
-      pwa: "PWA · Android · iOS",
+      pwa: "Desktop · Android · iOS",
     },
     nav: {
       home: "Home",
